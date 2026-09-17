@@ -264,7 +264,7 @@ async function load3DScene() {
 
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath(
-      "./vendor/draco/",
+      "./runtime/draco/",
     );
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
@@ -375,4 +375,5 @@ requestAnimationFrame(renderLoop);
 if (new URLSearchParams(window.location.search).get("mode") === "3d") {
   load3DScene();
 }
+
 
