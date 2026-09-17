@@ -12,6 +12,7 @@ const freeViewButton = document.querySelector("#free-view");
 const fullscreenButton = document.querySelector("#fullscreen");
 
 let THREE;
+let OrbitControlsClass;
 let renderer;
 let scene;
 let camera;
@@ -125,7 +126,7 @@ function frameIfNoCamera() {
 }
 
 function createControls() {
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls = new OrbitControlsClass(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
   controls.enablePan = false;
@@ -167,7 +168,7 @@ async function load3DScene() {
     const { GLTFLoader } = loaderModule;
     const { DRACOLoader } = dracoModule;
     const { OrbitControls } = controlsModule;
-    THREE.OrbitControls = OrbitControls;
+    OrbitControlsClass = OrbitControls;
 
     createRenderer();
     scene = new THREE.Scene();
@@ -176,7 +177,7 @@ async function load3DScene() {
 
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath(
-      "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/libs/draco/",
+      "./vendor/draco/",
     );
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
@@ -220,7 +221,8 @@ async function load3DScene() {
     console.error(error);
     setLoading(false);
     showCameraView();
-    setStatus("3D 场景载入失败，已保留原摄像机画面。请确认浏览器可以访问 CDN。", "error");
+    const detail = error?.message ? `（${error.message}）` : "";
+    setStatus(`3D 场景载入失败，已保留原摄像机画面。${detail}`, "error");
   } finally {
     isLoading = false;
     show3dButton.disabled = false;
@@ -259,3 +261,4 @@ requestAnimationFrame(renderLoop);
 if (new URLSearchParams(window.location.search).get("mode") === "3d") {
   load3DScene();
 }
+
