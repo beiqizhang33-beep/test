@@ -80,6 +80,47 @@
               <div class="spinner" aria-hidden="true"></div>
               <span id="loading-text">正在加载 3D 场景…</span>
             </div>
+            <aside
+              class="view-controls is-hidden"
+              id="view-controls"
+              aria-label="3D 视角控制面板"
+              aria-hidden="true"
+            >
+              <div class="view-controls-title">VIEW CONTROL</div>
+              <div class="view-control-grid">
+                <div class="view-control-group">
+                  <span class="view-control-label">前后</span>
+                  <div class="view-control-pair">
+                    <button type="button" data-nudge="forward" aria-label="向前移动视角">前</button>
+                    <button type="button" data-nudge="backward" aria-label="向后移动视角">后</button>
+                  </div>
+                </div>
+                <div class="view-control-group">
+                  <span class="view-control-label">左右</span>
+                  <div class="view-control-pair">
+                    <button type="button" data-nudge="left" aria-label="向左移动视角">左</button>
+                    <button type="button" data-nudge="right" aria-label="向右移动视角">右</button>
+                  </div>
+                </div>
+                <div class="view-control-group">
+                  <span class="view-control-label">上下</span>
+                  <div class="view-control-pair">
+                    <button type="button" data-nudge="up" aria-label="向上移动视角">上</button>
+                    <button type="button" data-nudge="down" aria-label="向下移动视角">下</button>
+                  </div>
+                </div>
+                <button class="view-control-action" id="auto-rotate" type="button" aria-pressed="false" title="开始或停止水平 365° 旋转">
+                  <span aria-hidden="true">↻</span><span>365°</span>
+                </button>
+                <div class="view-control-group view-control-zoom">
+                  <span class="view-control-label">缩放</span>
+                  <div class="view-control-pair">
+                    <button type="button" data-nudge="zoom-in" aria-label="放大视角">＋</button>
+                    <button type="button" data-nudge="zoom-out" aria-label="缩小视角">−</button>
+                  </div>
+                </div>
+              </div>
+            </aside>
             <div class="stage-badge" id="stage-badge">CAMERA VIEW</div>
           </div>
 

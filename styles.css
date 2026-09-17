@@ -279,7 +279,7 @@ h1 {
 .stage-badge {
   position: absolute;
   right: 16px;
-  bottom: 16px;
+  top: 16px;
   z-index: 4;
   padding: 7px 10px;
   color: #eef9da;
@@ -290,6 +290,131 @@ h1 {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.16em;
+}
+
+
+.view-controls {
+  position: absolute;
+  right: clamp(9px, 1vw, 16px);
+  bottom: clamp(9px, 1vw, 16px);
+  z-index: 4;
+  display: flex;
+  width: min(10%, 126px);
+  aspect-ratio: 9 / 16;
+  min-width: 0;
+  flex-direction: column;
+  gap: clamp(2px, 0.3vw, 5px);
+  padding: clamp(4px, 0.45vw, 7px);
+  border: 1px solid rgba(215, 242, 109, 0.24);
+  border-radius: clamp(7px, 0.85vw, 12px);
+  background: rgba(7, 17, 13, 0.6);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.view-controls-title {
+  overflow: hidden;
+  color: var(--accent);
+  font-size: clamp(6px, 0.53vw, 8px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.view-control-grid {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: clamp(2px, 0.28vw, 4px);
+}
+
+.view-control-group,
+.view-control-action {
+  min-height: 0;
+  border: 1px solid rgba(220, 242, 203, 0.13);
+  border-radius: clamp(4px, 0.5vw, 7px);
+  background: rgba(13, 33, 24, 0.42);
+}
+
+.view-control-group {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.view-control-label {
+  display: grid;
+  place-items: center;
+  padding: 1px;
+  color: rgba(242, 245, 233, 0.72);
+  border-right: 1px solid rgba(220, 242, 203, 0.1);
+  font-size: clamp(6px, 0.56vw, 8px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.view-control-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.view-controls button {
+  min-width: 0;
+  padding: 0;
+  color: var(--text);
+  border: 0;
+  background: transparent;
+  font-size: clamp(7px, 0.68vw, 10px);
+  font-weight: 800;
+  line-height: 1;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+  touch-action: none;
+}
+
+.view-control-pair button + button {
+  border-left: 1px solid rgba(220, 242, 203, 0.1);
+}
+
+.view-controls button:hover,
+.view-controls button:focus-visible,
+.view-controls button[aria-pressed="true"] {
+  color: #101909;
+  outline: none;
+  background: var(--accent);
+}
+
+.view-controls button:active {
+  transform: scale(0.94);
+}
+
+.view-control-action {
+  display: grid;
+  place-items: center;
+  grid-template-columns: 0.72fr 1.28fr;
+  padding: 0 6%;
+}
+
+.view-control-action span:first-child {
+  color: var(--accent);
+  font-size: clamp(10px, 1.05vw, 15px);
+  line-height: 1;
+}
+
+.view-control-action[aria-pressed="true"] span:first-child {
+  color: inherit;
+  animation: control-orbit 1.4s linear infinite;
+}
+
+@keyframes control-orbit {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-overlay {

@@ -10,6 +10,8 @@ const show3dButton = document.querySelector("#show-3d");
 const showCameraButton = document.querySelector("#show-camera");
 const freeViewButton = document.querySelector("#free-view");
 const fullscreenButton = document.querySelector("#fullscreen");
+const viewControls = document.querySelector("#view-controls");
+const autoRotateButton = document.querySelector("#auto-rotate");
 
 let THREE;
 let OrbitControlsClass;
@@ -24,6 +26,8 @@ let isFreeView = false;
 let isLoading = false;
 let resizeObserver;
 let lastFrameTime = performance.now();
+let heldNudge;
+let nudgeAnimationFrame;
 
 function setStatus(message, tone = "warm") {
   statusLine.textContent = message;
@@ -41,6 +45,11 @@ function showCameraView() {
   cameraView.classList.remove("is-hidden");
   webglLayer.classList.add("is-hidden");
   webglLayer.setAttribute("aria-hidden", "true");
+  stage.classList.remove("has-3d-preview");
+  viewControls.classList.add("is-hidden");
+  viewControls.setAttribute("aria-hidden", "true");
+  stopNudge();
+  setAutoRotation(false);
   stageBadge.textContent = "CAMERA VIEW";
   viewerCaption.textContent = "Blender camera render · frame 453";
   freeViewButton.textContent = "自由观察";
@@ -55,6 +64,9 @@ function showWebGLView() {
   cameraView.classList.add("is-hidden");
   webglLayer.classList.remove("is-hidden");
   webglLayer.setAttribute("aria-hidden", "false");
+  stage.classList.add("has-3d-preview");
+  viewControls.classList.remove("is-hidden");
+  viewControls.setAttribute("aria-hidden", "false");
   stageBadge.textContent = isFreeView ? "WEBGL · FREE VIEW" : "WEBGL · CAMERA";
   viewerCaption.textContent = isFreeView
     ? "WebGL scene · free camera controls enabled"
@@ -137,11 +149,86 @@ function createControls() {
   controls.enabled = false;
 }
 
+function setCameraWorldPosition(worldPosition) {
+  const localPosition = worldPosition.clone();
+  if (camera.parent) {
+    camera.parent.updateMatrixWorld(true);
+    camera.parent.worldToLocal(localPosition);
+  }
+  camera.position.copy(localPosition);
+  camera.updateMatrixWorld(true);
+}
+
+function setAutoRotation(active) {
+  if (!controls) return;
+  controls.autoRotate = active;
+  controls.autoRotateSpeed = 1.35;
+  autoRotateButton.setAttribute("aria-pressed", String(active));
+  autoRotateButton.title = active ? "停止水平 365° 旋转" : "开始水平 365° 旋转";
+}
+
+function nudgeCamera(command) {
+  if (!camera || !controls || !THREE) return;
+
+  setAutoRotation(false);
+  const target = controls.target;
+  const cameraPosition = camera.getWorldPosition(new THREE.Vector3());
+  const offset = cameraPosition.clone().sub(target);
+  const distance = Math.max(offset.length(), 0.001);
+
+  if (command === "zoom-in" || command === "zoom-out") {
+    const scale = command === "zoom-in" ? 0.88 : 1.14;
+    const nextDistance = THREE.MathUtils.clamp(
+      distance * scale,
+      controls.minDistance || 0.2,
+      controls.maxDistance || 220,
+    );
+    offset.setLength(nextDistance);
+    setCameraWorldPosition(target.clone().add(offset));
+  } else {
+    const forward = camera.getWorldDirection(new THREE.Vector3()).normalize();
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(forward, worldUp).normalize();
+    const step = Math.max(distance * 0.035, 0.18);
+    const translation = new THREE.Vector3();
+
+    if (command === "forward") translation.copy(forward).multiplyScalar(step);
+    if (command === "backward") translation.copy(forward).multiplyScalar(-step);
+    if (command === "left") translation.copy(right).multiplyScalar(-step);
+    if (command === "right") translation.copy(right).multiplyScalar(step);
+    if (command === "up") translation.copy(worldUp).multiplyScalar(step);
+    if (command === "down") translation.copy(worldUp).multiplyScalar(-step);
+
+    setCameraWorldPosition(cameraPosition.add(translation));
+    target.add(translation);
+  }
+
+  camera.lookAt(target);
+  camera.updateMatrixWorld(true);
+}
+
+function stopNudge() {
+  heldNudge = undefined;
+  if (nudgeAnimationFrame) cancelAnimationFrame(nudgeAnimationFrame);
+  nudgeAnimationFrame = undefined;
+}
+
+function startNudge(command) {
+  stopNudge();
+  heldNudge = command;
+  const applyNudge = () => {
+    if (!heldNudge) return;
+    nudgeCamera(heldNudge);
+    nudgeAnimationFrame = requestAnimationFrame(applyNudge);
+  };
+  applyNudge();
+}
+
 function renderLoop(now) {
   const delta = Math.min(0.1, (now - lastFrameTime) / 1000);
   lastFrameTime = now;
   if (mixer) mixer.update(delta);
-  if (controls?.enabled) controls.update();
+  if (controls?.enabled || controls?.autoRotate) controls.update();
   if (renderer && scene && camera && is3DVisible) renderer.render(scene, camera);
   requestAnimationFrame(renderLoop);
 }
@@ -229,12 +316,39 @@ async function load3DScene() {
   }
 }
 
+viewControls.addEventListener("pointerdown", (event) => {
+  const button = event.target.closest("button[data-nudge]");
+  if (!button || !model) return;
+  event.preventDefault();
+  button.setPointerCapture?.(event.pointerId);
+  startNudge(button.dataset.nudge);
+});
+
+viewControls.addEventListener("pointerup", stopNudge);
+viewControls.addEventListener("pointercancel", stopNudge);
+window.addEventListener("pointerup", stopNudge);
+
+viewControls.addEventListener("keydown", (event) => {
+  const button = event.target.closest("button[data-nudge]");
+  if (!button || (event.key !== "Enter" && event.key !== " ")) return;
+  event.preventDefault();
+  nudgeCamera(button.dataset.nudge);
+});
+
+autoRotateButton.addEventListener("click", () => {
+  if (!model || !controls) return;
+  const willRotate = !controls.autoRotate;
+  setAutoRotation(willRotate);
+  setStatus(willRotate ? "已开启水平 365° 自动旋转" : "已停止水平自动旋转", "ok");
+});
+
 show3dButton.addEventListener("click", load3DScene);
 showCameraButton.addEventListener("click", showCameraView);
 freeViewButton.addEventListener("click", () => {
   if (!model || !controls) return;
   isFreeView = !isFreeView;
   controls.enabled = isFreeView;
+  if (isFreeView) setAutoRotation(false);
   freeViewButton.setAttribute("aria-pressed", String(isFreeView));
   freeViewButton.textContent = isFreeView ? "锁定摄像机视角" : "自由观察";
   stageBadge.textContent = isFreeView ? "WEBGL · FREE VIEW" : "WEBGL · CAMERA";
