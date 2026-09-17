@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07110d" />
+    <meta
+      name="description"
+      content="森林小狐狸：Blender 原摄像机视角展示与可选 WebGL 互动查看。"
+    />
+    <title>森林小狐狸 · Blender Camera View</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="返回森林小狐狸首页">
+          <span class="brand-mark">✦</span>
+          <span>森林小狐狸</span>
+        </a>
+        <span class="topbar-note">Blender scene · fixed camera view</span>
+      </header>
+
+      <main class="main-content">
+        <section class="intro" aria-labelledby="page-title">
+          <div class="eyebrow">A LITTLE FOREST STORY</div>
+          <h1 id="page-title">森林里的小狐狸</h1>
+          <p class="intro-copy">
+            这是 Blender 文件中“摄像机”所看到的原始构图。网页默认展示摄像机画面，
+            并提供一个可选的 WebGL 版本用于浏览完整场景模型。
+          </p>
+          <div class="actions" role="group" aria-label="场景操作">
+            <button class="button button-primary" id="show-3d" type="button">
+              进入 3D 浏览
+            </button>
+            <button class="button button-secondary" id="show-camera" type="button">
+              回到摄像机画面
+            </button>
+            <button class="button button-secondary" id="free-view" type="button" disabled>
+              自由观察
+            </button>
+            <button class="button button-quiet" id="fullscreen" type="button">
+              全屏
+            </button>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite">
+            摄像机画面已就绪 · 第 453 帧 · 1920×1080
+          </p>
+        </section>
+
+        <section class="viewer-card" aria-label="森林小狐狸场景查看器">
+          <div class="viewer-header">
+            <div>
+              <div class="viewer-kicker">CAMERA 01</div>
+              <h2>原始摄像机视角</h2>
+            </div>
+            <div class="viewer-specs">
+              <span>16:9</span>
+              <span>141 mm</span>
+              <span>Frame 453</span>
+            </div>
+          </div>
+
+          <div class="stage" id="stage">
+            <img
+              id="camera-view"
+              src="./assets/forest-fox-camera.png"
+              alt="森林小狐狸 Blender 摄像机视角"
+            />
+            <div class="webgl-layer is-hidden" id="webgl-layer" aria-hidden="true"></div>
+            <div class="loading-overlay is-hidden" id="loading-overlay">
+              <div class="spinner" aria-hidden="true"></div>
+              <span id="loading-text">正在加载 3D 场景…</span>
+            </div>
+            <div class="stage-badge" id="stage-badge">CAMERA VIEW</div>
+          </div>
+
+          <div class="viewer-footer">
+            <span id="viewer-caption">Blender camera render · frame 453</span>
+            <a href="./assets/forest-fox.glb" download>下载 WebGL 模型</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>Forest Fox Web Edition</span>
+        <span>静态网页 · 可直接部署到 GitHub Pages</span>
+      </footer>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
